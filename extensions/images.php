@@ -1,7 +1,7 @@
 <?php
 	// PONGSOCKET TWEET ARCHIVE
 	// Image display extension
-	
+
 	if(!function_exists("imgid")){
 		function imgid($path){
 			$m = array();
@@ -12,7 +12,7 @@
 			return false;
 		}
 	}
-	
+
 	class Extension_Images {
 		public function enhanceTweet($tweet){
 			$imgs  = array();
@@ -37,7 +37,7 @@
 			}
 			$rt = (array_key_exists("rt", $tweetextra) && !empty($tweetextra['rt']));
 			$entities = $rt ? $tweetextra['rt']['extra']['entities'] : $tweetextra['entities'];
-			
+
 			// Let's go
 			$imgs    = array();
 			$text    = $rt ? $tweetextra['rt']['text'] : $tweet['text'];
@@ -45,13 +45,13 @@
 			//$text    = TwitterApi::fullLinkTweetText($text, $entities);
 			$links   = findURLs($mtext); // Two link lists because media links might be different from public URLs
 			$flinks  = findURLs($text);
-			
+
 			if(!empty($links) && !empty($flinks)){ // connection between the two
 				$linkmap = array_combine(array_keys($links), array_keys($flinks));
 			}
-			
+
 			$http    = 'http'; // possible to change to https (if all hosts support it)
-			
+
 			foreach($links as $link => $l){
 				if(is_array($l) && array_key_exists("host", $l) && array_key_exists("path", $l)){
 					$domain = domain($l['host']);
@@ -69,6 +69,9 @@
 						}
 						if($domain == "twitpic.com"){
 							$imgs[$link] = $http . "://twitpic.com/show/thumb/" . $imgid;
+						}
+						if($domain == "pict.mobi"){
+							$imgs[$link] = $http . "://pict.mobi/show/thumb/" . $imgid;
 						}
 						if($domain == "yfrog.com" || $domain == "yfrog.us"){
 							$imgs[$link] = $http . "://yfrog.com/" . $imgid . ".th.jpg";
@@ -97,7 +100,7 @@
 							preg_match('/<meta property="og:image" content="([^"]+)"\s*\/>/i', $html, $matches);
 							if(isset($matches[1])){
 								$imgs[$link] = $matches[1];
-							}			
+							}
 						}
 					}
 				}
@@ -107,7 +110,7 @@
 			}
 			return $tweet;
 		}
-		
+
 		public function displayTweet($d, $tweet){
 			@$tweetextra = unserialize($tweet['extra']);
 			if(array_key_exists("imgs", $tweetextra)){
@@ -115,7 +118,7 @@
 				$ds    = explode("\n", $d, 2);
 				$imgd  = ""; $i = 1; $is = array();
 				foreach($tweetextra['imgs'] as $link => $img){
-					$imgd .= 
+					$imgd .=
 						$x . "\t<a class=\"pic pic-" . s($i) . "\" href=\"" . s($link) . "\">" .
 						"<img src=\"" . s($img) . "\" alt=\"\" /></a>\n";
 					$is[$link] = $i++;
@@ -123,7 +126,7 @@
 				foreach($is as $link => $i){
 					$ds[1] = preg_replace(
 						"/class=\"([^\"]*)\" href=\"" . preg_quote(s($link), "/") . "\"/",
-						"class=\"$1 picl picl-" . s($i) . "\" href=\"" . s($link) . "\"", 
+						"class=\"$1 picl picl-" . s($i) . "\" href=\"" . s($link) . "\"",
 						$ds[1]
 					);
 				}
@@ -132,5 +135,5 @@
 			return array($d, $tweet);
 		}
 	}
-	
+
 	$o = new Extension_Images();
