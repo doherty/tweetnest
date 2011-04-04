@@ -1,7 +1,7 @@
 <?php
 	// PONGSOCKET TWEET ARCHIVE
 	// HTML output templates
-	
+
 	function displayMonths($tabs = 4){
 		global $db, $selectedDate, $highlightedMonths, $filterMode, $home, $config;
 		$months = array(); $max = 0; $total = 0; $amount = 0;
@@ -56,13 +56,13 @@
 			$s .= $y . "<li" . ($c ? " class=\"" . $c . "\"" : "") . ">" .
 			"<a href=\"" . ($cc > 0 ? s($pURL) : $path . "/" . s($m['y']) . "/" . s(pad($m['m']))) . "\">" .
 			"<span class=\"m\">" . date("F Y", mktime(1,0,0,$m['m'],1,$m['y'])) . "</span>" .
-			"<span class=\"n\"> " . number_format($m['c']) . ($cc > 0 ? " <strong>(" . number_format($cc) . ")</strong>" : "") . 
+			"<span class=\"n\"> " . number_format($m['c']) . ($cc > 0 ? " <strong>(" . number_format($cc) . ")</strong>" : "") .
 			"</span><span class=\"p\" style=\"width:" . round((($m['c']/$max)*100), 2) . "%\"></span></a></li>\n";
 		}
 		$s .= $y . "<li class=\"meta\">" . number_format($total) . " total tweets" . ($amount > 0 ? " <!-- approx. " . round(number_format($total / $amount), 2) . " monthly -->" : "") . "</li>\n" . $x . "</ul>\n";
 		return $s;
 	}
-	
+
 	function displayDays($year, $month, $tabs = 3){
 		global $db, $selectedDate, $config;
 		if(!is_numeric($month) || !is_numeric($year) || (is_numeric($month) && ($month > 12 || $month < 1)) || (is_numeric($year) && $year < 2000)){ return false; }
@@ -93,16 +93,16 @@
 				(!empty($d['c2']) ? ", " . s($d['c2']) . " retweet" . ($d['c2'] == 1 ? "" : "s") : "") .
 				"\" href=\"" . $path . "/" . s($year) . "/" . s(pad($month)) . "/" . s(pad($i+1)) . "\">" .
 				"<span class=\"p\" style=\"height:" . round((($d['total']/$max)*250), 2) . "px\">" .
-				"<span class=\"n\">" . ($d['total'] != 1 ? number_format($d['total']) : "") . "</span>" . 
-				(!empty($d['c1']) ? "<span class=\"r\" style=\"height:" . round((($d['c1']/$max)*250), 2) . "px\"></span>" : "") . 
-				(!empty($d['c2']) ? "<span class=\"rt\" style=\"height:" . round((($d['c2']/$max)*250), 2) . "px\"></span>" : "") . 
-				"</span><span class=\"m" . (($wd == 0 || $wd == 6) ? " mm" : "") . ($today ? " ms" : "") . "\">" . 
-				($today ? "<strong>" : "") . s($i+1) . ($today ? "</strong>" : "") . 
+				"<span class=\"n\">" . ($d['total'] != 1 ? number_format($d['total']) : "") . "</span>" .
+				(!empty($d['c1']) ? "<span class=\"r\" style=\"height:" . round((($d['c1']/$max)*250), 2) . "px\"></span>" : "") .
+				(!empty($d['c2']) ? "<span class=\"rt\" style=\"height:" . round((($d['c2']/$max)*250), 2) . "px\"></span>" : "") .
+				"</span><span class=\"m" . (($wd == 0 || $wd == 6) ? " mm" : "") . ($today ? " ms" : "") . "\">" .
+				($today ? "<strong>" : "") . s($i+1) . ($today ? "</strong>" : "") .
 				"</span></a></div>\n";
 			} else {
 				$s .= $y . "<div class=\"d\"><a href=\"" . $path . "/" . s($year) . "/" . s(pad($month)) . "/" . s(pad($i+1)) . "\">" .
 				"<span class=\"z\">0</span><span class=\"m" . (($wd == 0 || $wd == 6) ? " mm" : "") . ($today ? " ms" : "") . "\">" .
-				($today ? "<strong>" : "") . s($i+1) . ($today ? "</strong>" : "") . 
+				($today ? "<strong>" : "") . s($i+1) . ($today ? "</strong>" : "") .
 				"</span></a></div>\n";
 			}
 			$wd = ($wd == 6) ? 0 : $wd + 1;
@@ -110,7 +110,7 @@
 		$s .= $x . "</div></div>\n";
 		return $s;
 	}
-	
+
 	function tweetHTML($tweet, $tabs = 4){
 		global $twitterApi;
 		$tweetextra = array(); $tweetplace = array();
@@ -123,35 +123,34 @@
 		$rt = (array_key_exists("rt", $tweetextra) && !empty($tweetextra['rt']));
 		$t  = str_repeat("\t", $tabs);
 		if($rt){ $retweet = $tweetextra['rt']; }
-		
+
 		// Entities
 		$htmlcontent = s(stupefyRaw($rt ? $twitterApi->entityDecode($retweet['text']) : $tweet['text']), ENT_NOQUOTES);
 		$entities    = ($rt ? $tweetextra['rt']['extra']['entities'] : $tweetextra['entities']);
-		
+
 		if(areEntitiesEmpty($entities)){
 			$htmlcontent = linkifyTweet($htmlcontent);
 		} else {
 			$htmlcontent = linkifyTweet(entitifyTweet($htmlcontent, $entities), true);
 		}
-		
-		$d  =   $t . "<div id=\"tweet-" . s($tweet['tweetid']) . "\" class=\"tweet" . (($tweet['type'] == 1) ? " reply" : "") . (($tweet['type'] == 2) ? " retweet" : "") . "\">\n" . 
+
+		$d  =   $t . "<div id=\"tweet-" . s($tweet['tweetid']) . "\" class=\"tweet" . (($tweet['type'] == 1) ? " reply" : "") . (($tweet['type'] == 2) ? " retweet" : "") . "\">\n" .
 				($tweet['favorite'] ? $t . "\t<div class=\"fav\" title=\"A personal favorite\"><span>(A personal favorite)</span></div>\n" : "") .
-				$t . "\t<p class=\"text\">" . 
-				($rt ? "<a class=\"rt\" href=\"http://twitter.com/" . $retweet['screenname'] . "\"><strong>" . $retweet['screenname'] . "</strong></a> " : "") . 
-				
-				nl2br(p(highlightQuery($htmlcontent, $tweet), 3)) . "</p>\n" . 
-				
-				$t . "\t<p class=\"meta\">\n" . $t . "\t\t<a href=\"http://twitter.com/" . s($rt ? $retweet['screenname'] : $tweet['screenname']) . "/statuses/" . s($rt ? $retweet['tweetid'] : $tweet['tweetid']) . "\" class=\"permalink\">" . date("g:i A, M jS, Y", ($rt ? $retweet['time'] : $tweet['time'])) . "</a>\n" . 
+				$t . "\t<p class=\"text\">" . ($rt ? "<a class=\"rt\" href=\"http://twitter.com/" . $retweet['screenname'] . "\"><strong>" . $retweet['screenname'] . "</strong></a> " : "") .
+				nl2br(p(highlightQuery(emojifyTweet(linkifyTweet(
+					s(stupefyRaw($rt ? $twitterApi->entityDecode($retweet['text']) : $tweet['text']), ENT_NOQUOTES)
+				)), $tweet), 3)) . "</p>\n" .
+				$t . "\t<p class=\"meta\">\n" . $t . "\t\t<a href=\"http://twitter.com/" . s($rt ? $retweet['screenname'] : $tweet['screenname']) . "/statuses/" . s($rt ? $retweet['tweetid'] : $tweet['tweetid']) . "\" class=\"permalink\">" . date("g:i A, M jS, Y", ($rt ? $retweet['time'] : $tweet['time'])) . "</a>\n" .
 				$t . "\t\t<span class=\"via\">via " . ($rt ? $retweet['source'] : $tweet['source']) . "</span>\n" .
-				($rt ? $t . "\t\t<span class=\"rted\">(retweeted on " . date("g:i A, M jS, Y", $tweet['time']) . " <span class=\"via\">via " . $tweet['source'] . "</span>)</span>\n" : "") . 
-				((!$rt && $tweetextra && @!empty($tweetextra['in_reply_to_status_id'])) ? $t . "\t\t<a class=\"replyto\" href=\"http://twitter.com/" . s($tweetextra['in_reply_to_screen_name']) . "/statuses/" . s($tweetextra['in_reply_to_status_id']) . "\">in reply to " . s($tweetextra['in_reply_to_screen_name']) . "</a>\n" : "") . 
+				($rt ? $t . "\t\t<span class=\"rted\">(retweeted on " . date("g:i A, M jS, Y", $tweet['time']) . " <span class=\"via\">via " . $tweet['source'] . "</span>)</span>\n" : "") .
+				((!$rt && $tweetextra && @!empty($tweetextra['in_reply_to_status_id'])) ? $t . "\t\t<a class=\"replyto\" href=\"http://twitter.com/" . s($tweetextra['in_reply_to_screen_name']) . "/statuses/" . s($tweetextra['in_reply_to_status_id']) . "\">in reply to " . s($tweetextra['in_reply_to_screen_name']) . "</a>\n" : "") .
 				(($tweetplace && @$tweetplace->full_name) ? "\t\t<span class=\"place\">from <a href=\"http://maps.google.com/?q=" . urlencode($tweetplace->full_name) . "\">" . s($tweetplace->full_name) . "</a></span>" : "") .
 				$t . "\t</p>\n" . $t . "</div>\n";
 		$dd = hook("displayTweet", array($d, $tweet));
 		if(!empty($dd)){ $d = $dd[0]; }
 		return  $d;
 	}
-	
+
 	function tweetsHTML($q, $mode = "", $tabs = 4){
 		global $db, $home, $config;
 		$maxTweets = 200;
@@ -190,16 +189,16 @@
 				$nTQ      = $db->query($half . " > '" . $db->s($last)  . "' ORDER BY `time` ASC LIMIT 1");
 				if($db->numRows($pTQ) > 0){
 					$prevTweet = $db->fetch($pTQ);
-					$nextprev .= "<a class=\"prev\" href=\"" . $path . "/" . 
-						s($prevTweet['year']) . "/" . s(pad($prevTweet['month'])) . "/" . s(pad($prevTweet['day'])) . 
-						"\">&larr; <span>" . date("F jS", mktime(4,0,0, $prevTweet['month'], $prevTweet['day'], $prevTweet['year'])) . 
+					$nextprev .= "<a class=\"prev\" href=\"" . $path . "/" .
+						s($prevTweet['year']) . "/" . s(pad($prevTweet['month'])) . "/" . s(pad($prevTweet['day'])) .
+						"\">&larr; <span>" . date("F jS", mktime(4,0,0, $prevTweet['month'], $prevTweet['day'], $prevTweet['year'])) .
 						"</span></a> ";
 				}
 				if($db->numRows($nTQ) > 0){
 					$nextTweet = $db->fetch($nTQ);
-					$nextprev .= "<a class=\"next\" href=\"" . $path . "/" . 
-						s($nextTweet['year']) . "/" . s(pad($nextTweet['month'])) . "/" . s(pad($nextTweet['day'])) . 
-						"\"><span>" . date("F jS", mktime(4,0,0, $nextTweet['month'], $nextTweet['day'], $nextTweet['year'])) . 
+					$nextprev .= "<a class=\"next\" href=\"" . $path . "/" .
+						s($nextTweet['year']) . "/" . s(pad($nextTweet['month'])) . "/" . s(pad($nextTweet['day'])) .
+						"\"><span>" . date("F jS", mktime(4,0,0, $nextTweet['month'], $nextTweet['day'], $nextTweet['year'])) .
 						"</span> &rarr;</a>";
 				}
 				if($nextprev){
@@ -214,7 +213,7 @@
 		}
 		return $s;
 	}
-	
+
 	function errorPage($html, $tabs = 3){
 		global $config, $author, $authorextra;
 		$t         = str_repeat("\t", $tabs);
@@ -224,7 +223,7 @@
 		include "footer.php";
 		exit;
 	}
-	
+
 	function highlightQuery($str, $tweet){
 		if(!isset($tweet['word']) || (!is_array($tweet['word']) && !is_string($tweet['word']))){ return $str; }
 		if(!is_array($tweet['word'])){
@@ -256,9 +255,9 @@
 		$str = str_replace("<strong class=searchword>", "<strong class=\"searchword\">", $str);
 		return $str;
 	}
-	
+
 	// CSS functions ------------------------------------
-	
+
 	$css_i = 0;
 	global $css_i;
 	function css($var, $canBeEmpty = false){ // Display CSS value found in given config variable
@@ -323,7 +322,7 @@
 		$css_i = 0;
 		return false;
 	}
-	
+
 	function standardCss($var){
 		$var = trim(strtolower($var));
 		if(substr_count($var, "color") > 0){
@@ -341,7 +340,7 @@
 			return false; // for the WTF case
 		}
 	}
-	
+
 	function profileCss($val){
 		if(preg_match("/^https?:\/\//", $val)){
 			return "url(" . $val . ")";
@@ -351,20 +350,20 @@
 		}
 		return cssHex($val);
 	}
-	
+
 	function cssHex($val){
 		return "#" . preg_replace('/^([0-9a-f])\1([0-9a-f])\2([0-9a-f])\3$/i', '\1\2\3', ltrim($val, "#"));
 	}
-	
+
 	function sBool($val){
 		if(is_bool($val)){ return $val; }
 		if(strtolower(trim($val)) == "false" || $val === 0){ return false; }
 		if(strtolower(trim($val)) == "true"  || $val === 1){ return true;  }
 		return $val;
 	}
-	
+
 	// Internal functions -------------------------------
-	
+
 	function _linkifyTweet_link($a, $b, $c, $d){
 		$url = stripslashes($a);
 		$end = stripslashes($d);
@@ -390,12 +389,12 @@
 		}
 		return $html;
 	}
-	
+
 	function entitifyTweet($str, $entities, $newwindow = false){
 		if(!$entities){ return $str; }
 		$replacements = array();
 		$tb = $newwindow ? ' target="_blank"' : '';
-		
+
 		// Mentions
 		foreach($entities->user_mentions as $entity){
 			$replacements[$entity->indices[0]] = array(
@@ -403,7 +402,7 @@
 				'content' => '<span class="at">@</span><a class="user"' . $tb . ' href="http://twitter.com/' . s($entity->screen_name) . '">' . s($entity->screen_name) . '</a>'
 			);
 		}
-		
+
 		// Hashtags
 		foreach($entities->hashtags as $entity){
 			$replacements[$entity->indices[0]] = array(
@@ -411,47 +410,47 @@
 				'content' => '<a class="hashtag" rel="search"' . $tb . ' href="http://twitter.com/search?q=%23' . urlencode($entity->text) . '">#' . s($entity->text) . '</a>'
 			);
 		}
-		
+
 		// URLs
 		foreach($entities->urls as $entity){
 			$truncated = (!empty($entity->display_url) && mb_substr($entity->display_url, -1) == '…');
 			$replacements[$entity->indices[0]] = array(
 				'end'     => $entity->indices[1], // quittin' rel="nofollow" since this is meant for your own site
-				'content' => '<a class="link" href="' . s($entity->url) . '"' . $tb . 
-							(!empty($entity->expanded_url) && $truncated ? ' title="' . s($entity->expanded_url) . '"' : '') . '>' . 
+				'content' => '<a class="link" href="' . s($entity->url) . '"' . $tb .
+							(!empty($entity->expanded_url) && $truncated ? ' title="' . s($entity->expanded_url) . '"' : '') . '>' .
 							(!empty($entity->display_url) ? $entity->display_url : $entity->url) . '</a>'
 			);
 		}
-		
+
 		// Media
 		if(isset($entities->media) && is_array($entities->media)){
 			foreach($entities->media as $entity){
 				$truncated = (!empty($entity->display_url) && mb_substr($entity->display_url, -1) == '…');
 				$replacements[$entity->indices[0]] = array(
 					'end'     => $entity->indices[1],
-					'content' => '<a class="media" href="' . s($entity->url) . '"' . $tb . ' data-image="' . s($entity->media_url) . '"' . 
-								(!empty($entity->expanded_url) && $truncated ? ' title="' . s($entity->expanded_url) . '"' : '') . '>' . 
+					'content' => '<a class="media" href="' . s($entity->url) . '"' . $tb . ' data-image="' . s($entity->media_url) . '"' .
+								(!empty($entity->expanded_url) && $truncated ? ' title="' . s($entity->expanded_url) . '"' : '') . '>' .
 								(!empty($entity->display_url) ? $entity->display_url : $entity->url) . '</a>'
 				);
 			}
 		}
-		
+
 		// Putting it all together
 		$out = '';
 		$lastEntityEnded = 0;
-		
+
 		ksort($replacements);
-		
+
 		foreach($replacements as $position => $replacement){
 			$out .= mb_substr($str, $lastEntityEnded, $position - $lastEntityEnded);
 			$out .= $replacement['content'];
 			$lastEntityEnded = $replacement['end'];
 		}
-		
+
 		$out .= mb_substr($str, $lastEntityEnded);
 		return $out;
 	}
-	
+
 	function areEntitiesEmpty($entities){
 		if(is_object($entities)){
 			foreach(get_object_vars($entities) as $property => $value){
@@ -462,31 +461,36 @@
 		}
 		return true;
 	}
-	
+
+	function emojifyTweet($str){
+		$html = emoji_unified_to_html(emoji_softbank_to_unified($str));
+		return $html;
+	}
+
 	// Altered "Days in Month" function taken from:
 		// PHP Calendar Class Version 1.4 (5th March 2001)
-		//  
+		//
 		// Copyright David Wilkinson 2000 - 2001. All Rights reserved.
-		// 
+		//
 		// This software may be used, modified and distributed freely
-		// providing this copyright notice remains intact at the head 
+		// providing this copyright notice remains intact at the head
 		// of the file.
 		//
 		// This software is freeware. The author accepts no liability for
-		// any loss or damages whatsoever incurred directly or indirectly 
-		// from the use of this script. The author of this software makes 
-		// no claims as to its fitness for any purpose whatsoever. If you 
-		// wish to use this software you should first satisfy yourself that 
+		// any loss or damages whatsoever incurred directly or indirectly
+		// from the use of this script. The author of this software makes
+		// no claims as to its fitness for any purpose whatsoever. If you
+		// wish to use this software you should first satisfy yourself that
 		// it meets your requirements.
 		//
 		// URL:   http://www.cascade.org.uk/software/php/calendar/
 		// Email: davidw@cascade.org.uk
 	function getDaysInMonth($month, $year){
 		if($month < 1 || $month > 12){ return 0; }
-		
+
 		$daysInMonth = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 		$d = $daysInMonth[$month - 1];
-		
+
 		if($month == 2){
 			// Check for leap year
 			// Forget the 4000 rule, I doubt I'll be around then...

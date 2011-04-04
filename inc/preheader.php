@@ -38,6 +38,7 @@
 	$search = new TweetNestSearch();
 	
 	// Outputting various generic parts
+	require "emoji.php";
 	require "html.php";
 	
 	// Extensions
