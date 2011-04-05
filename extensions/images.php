@@ -46,6 +46,12 @@
 					$domain = domain($l['host']);
 					$imgid  = imgid($l['path']);
 					if($imgid){
+						if($domain == "flic.kr"){
+							$imgid = explode("/",$l['path']);
+							$c = count($imgid) - 1;
+							$imgid = $imgid[$c];
+							$imgs[$link] = "http://flic.kr/p/img/".$imgid."_m.jpg";
+						}
 						if($domain == "twimg.com"){
 							$displaylink = $linkmap ? $linkmap[$link] : $link;
 							$imgs[$displaylink] = $http . "://p.twimg.com" . $l['path'] . ":thumb";
