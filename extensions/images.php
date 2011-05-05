@@ -15,14 +15,25 @@
 	
 	class Extension_Images {
 		public function enhanceTweet($tweet){
-			// Finding entities
-			$tweetextra = array();
-			if(!empty($tweet['extra'])){
-				if(is_array($tweet['extra'])){
-					$tweetextra = $tweet['extra'];
-				} else {
-					@$tweetextra = unserialize($tweet['extra']);
-				}
+			$imgs  = array();
+			$links = findURLs($tweet['text']);
+
+			foreach($links as $link => $l){
+				$curl = curl_init($link);
+				curl_setopt_array($curl, array(
+								CURLOPT_USERAGENT => "Mozilla/5.0 (Compatible; libCURL)",
+								CURLOPT_TIMEOUT => 5,
+								CURLOPT_RETURNTRANSFER => 1,
+								CURLOPT_FOLLOWLOCATION => 1,
+								CURLOPT_MAXREDIRS => 3,
+								CURLOPT_NOBODY => 1,
+						));
+
+				$longurl = curl_exec($curl);
+				$url = curl_getinfo($curl, CURLINFO_EFFECTIVE_URL);
+				$url = parse_url($url);
+
+				$links[$link] = $url;
 			}
 			$rt = (array_key_exists("rt", $tweetextra) && !empty($tweetextra['rt']));
 			$entities = $rt ? $tweetextra['rt']['extra']['entities'] : $tweetextra['entities'];
@@ -50,7 +61,7 @@
 							$imgid = explode("/",$l['path']);
 							$c = count($imgid) - 1;
 							$imgid = $imgid[$c];
-							$imgs[$link] = "http://flic.kr/p/img/".$imgid."_m.jpg";
+							$imgs[$link] = $http . "://flic.kr/p/img/".$imgid."_m.jpg";
 						}
 						if($domain == "twimg.com"){
 							$displaylink = $linkmap ? $linkmap[$link] : $link;
