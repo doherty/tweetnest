@@ -4,7 +4,7 @@
 			</div></div>
 		</div>
 		<div id="footer">
-			&copy; <?php echo date("Y") . " <a href=\"http://twitter.com/" . s($config['twitter_screenname']) . "\">" . s($author['realname']) . "</a>"; ?>, powered by <a href="http://pongsocket.com/tweetnest/">Tweet Nest</a>
+			&copy; <?php echo date("Y") . " <a href=\"https://twitter.com/" . s($config['twitter_screenname']) . "\">" . s($author['realname']) . "</a>"; ?>, powered by <a href="http://pongsocket.com/tweetnest/">Tweet Nest</a>
 		</div>
 	</div>
 </body>
