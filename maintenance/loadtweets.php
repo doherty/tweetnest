@@ -1,25 +1,25 @@
 <?php
 	// TWEET NEST
 	// Load tweets
-	
+
 	error_reporting(E_ALL ^ E_NOTICE); ini_set("display_errors", true); // For easy debugging, this is not a production page
 	@set_time_limit(0);
-	
+
 	require_once "mpreheader.php";
 	$p = "";
-	
+
 	// LOGGING
 	// The below is not important, so errors surpressed
-	$f = @fopen("loadlog.txt", "a"); @fwrite($f, "Attempted load " . date("r") . "\n"); @fclose($f);
-	
+	//$f = @fopen("loadlog.txt", "a"); @fwrite($f, "Attempted load " . date("r") . "\n"); @fclose($f);
+
 	// Header
 	$pageTitle = "Loading tweets";
 	require "mheader.php";
-	
+
 	// Identifying user
 	if(!empty($_GET['userid']) && is_numeric($_GET['userid'])){
 		$q = $db->query(
-			"SELECT * FROM `".DTP."tweetusers` WHERE `userid` = '" . $db->s($_GET['userid']) . 
+			"SELECT * FROM `".DTP."tweetusers` WHERE `userid` = '" . $db->s($_GET['userid']) .
 			"' LIMIT 1"
 		);
 		if($db->numRows($q) > 0){
@@ -30,7 +30,7 @@
 	} else {
 		if(!empty($_GET['screenname'])){
 			$q = $db->query(
-				"SELECT * FROM `".DTP."tweetusers` WHERE `screenname` = '" . $db->s($_GET['screenname']) . 
+				"SELECT * FROM `".DTP."tweetusers` WHERE `screenname` = '" . $db->s($_GET['screenname']) .
 				"' LIMIT 1"
 			);
 			if($db->numRows($q) > 0){
@@ -40,7 +40,7 @@
 			}
 		}
 	}
-	
+
 	// Define import routines
 	function totalTweets($p){
 		global $twitterApi;
@@ -50,7 +50,7 @@
 		if(is_array($data) && $data[0] === false){ dieout(l(bad("Error: " . $data[1] . "/" . $data[2]))); }
 		return $data->statuses_count;
 	}
-	
+
 	function importTweets($p){
 		global $twitterApi, $db, $config, $access, $search;
 		$p = trim($p);
@@ -59,9 +59,9 @@
 		$tweets   = array();
 		$sinceID  = 0;
 		$maxID    = 0;
-		
+
 		echo l("Importing:\n");
-		
+
 		// Do we already have tweets?
 		$pd = $twitterApi->getUserParam($p);
 		if($pd['name'] == "screen_name"){
@@ -76,21 +76,21 @@
 			$ti      = $db->fetch($tiQ);
 			$sinceID = $ti['tweetid'];
 		}
-		
+
 		echo l("User ID: " . $uid . "\n");
-		
+
 		// Find total number of tweets
 		$total = totalTweets($p);
 		if($total > 3200){ $total = 3200; } // Due to current Twitter limitation
 		$pages = ceil($total / $maxCount);
-		
+
 		echo l("Total tweets: <strong>" . $total . "</strong>, Approx. page total: <strong>" . $pages . "</strong>\n");
 		if($sinceID){
 			echo l("Newest tweet I've got: <strong>" . $sinceID . "</strong>\n");
 		}
-		
+
 		$page = 1;
-		
+
 		// Retrieve tweets
 		do {
 			// Determine path to Twitter timeline resource
@@ -103,7 +103,7 @@
 			$data = $twitterApi->query($path);
 			// Drop out on connection error
 			if(is_array($data) && $data[0] === false){ dieout(l(bad("Error: " . $data[1] . "/" . $data[2]))); }
-			
+
 			// Start parsing
 			echo l("<strong>" . ($data ? count($data) : 0) . "</strong> new tweets on this page\n");
 			if(!empty($data)){
@@ -126,7 +126,7 @@
 			}
 			$page++;
 		} while(!empty($data));
-		
+
 		if(count($tweets) > 0){
 			// Ascending sort, oldest first
 			$tweets = array_reverse($tweets);
@@ -154,7 +154,7 @@
 		} else {
 			echo l(bad("Nothing to insert.\n"));
 		}
-		
+
 		// Checking personal favorites -- scanning all
 		echo l("\n<strong>Syncing favourites...</strong>\n");
 		// Resetting these
@@ -183,14 +183,14 @@
 			echo l("<strong>" . count($favs) . "</strong> favorite own tweets so far\n");
 			$page++;
 		} while(!empty($data));
-		
+
 		// Blank all favorites
 		$db->query("UPDATE `".DTP."tweets` SET `favorite` = '0'");
 		// Insert favorites into DB
 		$db->query("UPDATE `".DTP."tweets` SET `favorite` = '1' WHERE `tweetid` IN ('" . implode("', '", $favs) . "')");
 		echo l(good("Updated favorites!"));
 	}
-	
+
 	if($p){
 		importTweets($p);
 	} else {
@@ -205,5 +205,5 @@
 			echo l(bad("No users to import to!"));
 		}
 	}
-	
+
 	require "mfooter.php";
