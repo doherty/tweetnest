@@ -160,7 +160,7 @@
 		// Resetting these
 		$favs  = array(); $maxID = 0; $sinceID = 0; $page = 1;
 		do {
-			$path = "1/favorites.json?" . $p . "&count=" . $maxCount . ($maxID ? "&max_id=" . $maxID : "");
+			$path = "1/favorites.json?" . $p . "&include_entities=true&count=" . $maxCount . ($maxID ? "&max_id=" . $maxID : "");
 			echo l("Retrieving page <strong>#" . $page . "</strong>: <span class=\"address\">" . ls($path) . "</span>\n");
 			$data = $twitterApi->query($path);
 			if(is_array($data) && $data[0] === false){ dieout(l(bad("Error: " . $data[1] . "/" . $data[2]))); }
