@@ -42,7 +42,7 @@ class Extension_Images
                             break;
                         case 'twimg.com';
                             $displaylink = $linkmap ? $linkmap[$link] : $link;
-                            $imgs[$displaylink] = $http . "://p.twimg.com" . $l['path'] . ":thumb";
+                            $imgs[$displaylink] = $http . "://pbs.twimg.com" . $l['path'] . ":thumb";
                             break;
                         case 'twitpic.com':
                             $imgs[$link] = $http . "://twitpic.com/show/thumb/" . $imgid;
