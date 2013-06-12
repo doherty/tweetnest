@@ -97,9 +97,17 @@
 						}
 						if($domain == "instagr.am"){
 							$html = (string)getURL($link);
-							preg_match('/<meta property="og:image" content="([^"]+)"\s*\/>/i', $html, $matches);
+							preg_match('/<meta property="og:image" content="([^"]+)"\s*\ />/i', $html, $matches);
 							if(isset($matches[1])){
 								$imgs[$link] = $matches[1];
+							}
+						}
+						if($domain == "instagr.am"){
+							$html = (string) getURL($link);
+							preg_match('/<meta property="og:image" content="[^"]+"\/>/i', $html, $matches);
+							if (isset($matches[0]))
+							{
+								$imgs[$link] = substr($matches[0], 35, -4);
 							}
 						}
 					}
