@@ -12,6 +12,7 @@
 		    }
 
 		    $keys = array();
+		    $replacements = array();
 
 		    foreach($tweet['extra']['entities']->urls as $u) {
 
@@ -42,7 +43,7 @@
 
 			return $tweet;
 		}
-		
+
 		public function displayTweet($d, $tweet){
 		// (probably) unnecessary if enhanceTweet() has run already
 			@$tweetextra = unserialize($tweet['extra']);
@@ -64,5 +65,5 @@
 			return array($d, $tweet);
 		}
 	}
-	
+
 	$o = new Extension_Entities();
