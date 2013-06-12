@@ -1,13 +1,13 @@
 <?php
 	// PONGSOCKET TWEET ARCHIVE
 	// Extension and event handling
-	
+
 	$ext = array(); // Global extension objects array
 	global $ext;
-	
+
 	$path   = rtrim($config['path'], "/");
 	$extDir = FULL_PATH . "/extensions";
-	
+
 	// Loading extensions...
 	foreach(scandir($extDir) as $file){
 		if(substr($file, -4) == ".php" && filetype($extDir . "/" . $file) == "file"){
@@ -17,7 +17,7 @@
 			$ext[$name] = $o; // Giving a value to main object $o is required.
 		}
 	}
-	
+
 	function hook($name, $args, $singleArray = false){
 		global $ext;
 		$x = $args;
