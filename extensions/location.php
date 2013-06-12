@@ -10,7 +10,7 @@
 			{
 				preg_match("/^([\t]+)</", $d, $m); $x = $m[1];
 				$ds    = explode("\n", $d, 2);
-				$extra = '<a class="pic map" href="http://maps.google.com/?ie=UTF8&amp;ll='.$coords->coordinates[1].','.$coords->coordinates[0].'"><img src="http://maps.google.com/maps/api/staticmap?size=150x150&amp;center='.$coords->coordinates[1].','.$coords->coordinates[0].'&amp;maptype=hybrid&amp;zoom=15&amp;markers='.$coords->coordinates[1].','.$coords->coordinates[0].'&amp;sensor=false" width="150" height="150" /></a>';
+				$extra = '<a class="pic map" href="https://maps.google.com/?ie=UTF8&amp;ll='.$coords->coordinates[1].','.$coords->coordinates[0].'"><img src="http://maps.google.com/maps/api/staticmap?size=150x150&amp;center='.$coords->coordinates[1].','.$coords->coordinates[0].'&amp;maptype=hybrid&amp;zoom=15&amp;markers='.$coords->coordinates[1].','.$coords->coordinates[0].'&amp;sensor=false" width="150" height="150" /></a>';
 				$d     = implode("\n", array($ds[0], rtrim($extra, "\n"), $ds[1]));
 			}
 			return array($d, $tweet);
